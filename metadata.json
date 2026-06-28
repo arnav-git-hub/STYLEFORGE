@@ -1,0 +1,6 @@
+{
+  "name": "StyleForge",
+  "description": "An avant-garde digital fashion design studio and moodboard suite, powered by AI to prototype fabric textures, silhouette layers, and interactive style showcases.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

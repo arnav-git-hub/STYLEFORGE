@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", sans-serif;
+  --font-headline: "Bricolage Grotesque", sans-serif;
+  --font-accent: "Bricolage Grotesque", sans-serif;
+  
+  --color-surface-tint: #b90068;
+  --color-on-secondary-fixed-variant: #6700b5;
+  --color-tertiary: #705d00;
+  --color-outline: #8f6e78;
+  --color-tertiary-container: #c9a900;
+  --color-secondary-fixed: #efdbff;
+  --color-surface: #faf9f8;
+  --color-outline-variant: #e3bdc7;
+  --color-on-secondary-fixed: #2c0051;
+  --color-surface-variant: #e3e2e1;
+  --color-on-primary-fixed: #3e001f;
+  --color-primary-fixed: #ffd9e3;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container: #eeeeed;
+  --color-secondary-fixed-dim: #dcb8ff;
+  --color-surface-bright: #faf9f8;
+  --color-secondary-container: #9c42f4;
+  --color-on-secondary-container: #fffbff;
+  --color-secondary: #821dda;
+  --color-background: #faf9f8;
+  --color-primary-fixed-dim: #ffb0ca;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-inverse-on-surface: #f1f0f0;
+  --color-surface-container-high: #e9e8e7;
+  --color-surface-dim: #dadad9;
+  --color-surface-container-highest: #e3e2e1;
+  --color-on-primary-fixed-variant: #8d004e;
+  --color-on-tertiary-container: #4c3e00;
+  --color-tertiary-fixed: #ffe16d;
+  --color-on-tertiary-fixed: #221b00;
+  --color-primary: #b40065;
+  --color-inverse-primary: #ffb0ca;
+  --color-on-primary: #ffffff;
+  --color-on-surface: #1a1c1c;
+  --color-error: #ba1a1a;
+  --color-on-primary-container: #fffbff;
+  --color-inverse-surface: #2f3130;
+  --color-surface-container-low: #f4f3f2;
+  --color-on-tertiary: #ffffff;
+  --color-primary-container: #e10080;
+  --color-on-surface-variant: #5b3f48;
+  --color-on-error: #ffffff;
+  --color-tertiary-fixed-dim: #e9c400;
+  --color-on-background: #1a1c1c;
+  --color-on-secondary: #ffffff;
+  --color-on-tertiary-fixed-variant: #544600;
+}
+
+@layer utilities {
+  .torn-paper-bottom {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 95%, 98% 97%, 95% 94%, 92% 98%, 88% 94%, 85% 97%, 80% 95%, 75% 98%, 70% 94%, 65% 97%, 60% 95%, 55% 98%, 50% 94%, 45% 97%, 40% 95%, 35% 98%, 30% 94%, 25% 97%, 20% 95%, 15% 98%, 10% 94%, 5% 97%, 0% 95%);
+  }
+
+  .torn-edge {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 95%, 98% 98%, 95% 94%, 92% 99%, 88% 93%, 85% 100%, 80% 92%, 75% 98%, 70% 91%, 65% 99%, 60% 93%, 55% 97%, 50% 92%, 45% 98%, 40% 94%, 35% 100%, 30% 92%, 25% 97%, 20% 93%, 15% 99%, 10% 92%, 5% 98%, 0% 94%);
+  }
+
+  .washi-tape {
+    background: rgba(225, 0, 128, 0.4);
+    transform: rotate(-3deg);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .measuring-tape {
+    background-image: repeating-linear-gradient(90deg, #1a1c1c 0px, #1a1c1c 1px, transparent 1px, transparent 8px);
+    height: 12px;
+    width: 100%;
+    position: relative;
+  }
+  
+  .measuring-tape::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(90deg, #1a1c1c 0px, #1a1c1c 2px, transparent 2px, transparent 32px);
+  }
+
+  .sticker-border {
+    filter: drop-shadow(2px 2px 0px #1a1c1c);
+  }
+
+  .paint-dab {
+    width: 12px;
+    height: 12px;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+
+  .hard-shadow-pink {
+    box-shadow: 6px 6px 0px 0px #b40065;
+  }
+
+  .hard-shadow-purple {
+    box-shadow: 6px 6px 0px 0px #821dda;
+  }
+
+  .hard-shadow-black {
+    box-shadow: 6px 6px 0px 0px #1a1c1c;
+  }
+  
+  .hard-shadow-tertiary {
+    box-shadow: 6px 6px 0px 0px #705d00;
+  }
+  
+  .sticker-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.9);
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+  display: inline-flex;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
