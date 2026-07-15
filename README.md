@@ -8,7 +8,7 @@ This project is submitted for the **Edge Hack 2026** hackathon.
 
 ## 📽️ Interactive Walkthrough & Demo Video
 
-![Walkthrough Demo](./artifacts/designalchemy_walkthrough.webp)
+![Walkthrough Demo](./artifacts/demo.gif)
 
 ---
 
