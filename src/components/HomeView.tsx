@@ -23,12 +23,12 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
         </div>
 
         <motion.h1 
-          className="font-display text-5xl md:text-8xl font-extrabold uppercase tracking-tight text-on-surface leading-none mb-6"
+          className="font-display text-4xl sm:text-6xl md:text-7xl font-extrabold uppercase tracking-tighter text-on-surface leading-none mb-6 max-w-full break-words"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          Style<span className="text-primary font-black">Forge</span>
+          Design<span className="text-primary font-black">Alchemy</span>
         </motion.h1>
 
         <motion.p 
@@ -156,7 +156,7 @@ export default function HomeView({ onNavigate }: HomeViewProps) {
       {/* Decorative Washi Tape Accent */}
       <div className="flex justify-center my-8">
         <div className="washi-tape px-10 py-1.5 font-headline font-bold text-sm text-white uppercase text-center sticker-shadow">
-          MADE IN STYLEFORGE LABS // 2026 COUTURE
+          MADE IN DESIGNALCHEMY LABS // 2026 COUTURE
         </div>
       </div>
     </div>

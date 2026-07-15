@@ -30,6 +30,7 @@ export interface ChatMessage {
   role: "user" | "model";
   content: string;
   timestamp: Date;
+  image?: string; // Optional attached image base64
 }
 
 export interface DesignLayer {

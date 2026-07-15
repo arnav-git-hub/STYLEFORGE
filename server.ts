@@ -63,14 +63,33 @@ Give highly tailored design-oriented answers, suggesting specific fabrics, silho
 
   try {
     if (ai) {
-      // Format chat history
-      const contents = messages.map(msg => ({
-        role: msg.role === "user" ? "user" as const : "model" as const,
-        parts: [{ text: msg.content }]
-      }));
+      const contents = messages.map((msg: any) => {
+        const parts: any[] = [];
+        if (msg.content) {
+          parts.push({ text: msg.content });
+        }
+        if (msg.image) {
+          const matches = msg.image.match(/^data:(image\/\w+);base64,(.+)$/);
+          if (matches) {
+            parts.push({
+              inlineData: {
+                mimeType: matches[1],
+                data: matches[2]
+              }
+            });
+          }
+        }
+        if (parts.length === 0) {
+          parts.push({ text: "" });
+        }
+        return {
+          role: msg.role === "user" ? "user" as const : "model" as const,
+          parts,
+        };
+      });
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.0-flash",
         contents,
         config: {
           systemInstruction,
@@ -224,7 +243,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`StyleForge Server booted successfully on http://localhost:${PORT}`);
+    console.log(`DesignAlchemy Server booted successfully on http://localhost:${PORT}`);
   });
 }
 

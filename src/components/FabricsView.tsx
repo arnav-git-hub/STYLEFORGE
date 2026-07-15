@@ -53,7 +53,7 @@ export default function FabricsView({
         tags: ["AI-Generated", ...(newFabricData.colors ? ["Custom Palette"] : [])],
         drapeFactor: "Medium",
         weight: "Medium",
-        designer: "StyleForge AI"
+        designer: "DesignAlchemy AI"
       };
 
       onAddFabric(generatedFabric);
@@ -102,7 +102,7 @@ export default function FabricsView({
           </div>
 
           <p className="text-sm text-on-surface-variant mb-6 leading-relaxed">
-            Specify pattern cues, drape feelings, or metallic finishes, and let StyleForge construct a custom vector weave preview.
+            Specify pattern cues, drape feelings, or metallic finishes, and let DesignAlchemy construct a custom vector weave preview.
           </p>
 
           <form onSubmit={handleGenerate} className="space-y-4">

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Layers, Eye, EyeOff, Sparkles, Send, Loader2, RefreshCw, 
-  HelpCircle, Check, Copy, Sliders, Scissors, Award 
+  HelpCircle, Check, Copy, Sliders, Scissors, Award, Paperclip, X 
 } from "lucide-react";
 import { Fabric, DesignLayer, ChatMessage } from "../types";
 
@@ -17,38 +17,85 @@ export default function StudioView({
   activeStudioFabricIds, 
   onSelectFabricForStudio 
 }: StudioViewProps) {
-  // Collection conceptual title
-  const [conceptTitle, setConceptTitle] = useState("Vaporous Avant-Garde 2026");
+  // Collection conceptual title - Persisted
+  const [conceptTitle, setConceptTitle] = useState(() => {
+    return localStorage.getItem("designalchemy_concept_title") || "Vaporous Avant-Garde 2026";
+  });
   
-  // Layer definitions
-  const [layers, setLayers] = useState<DesignLayer[]>([
-    { id: "layer-1", name: "Base Silhouette", type: "silhouette", opacity: 0.85, visible: true },
-    { id: "layer-2", name: "Body Panel (Silk)", type: "base_fabric", opacity: 0.8, visible: true, fabricId: "emerald-silk" },
-    { id: "layer-3", name: "Collar Accent (Velvet)", type: "accent", opacity: 0.75, visible: true, fabricId: "ruby-velvet" },
-    { id: "layer-4", name: "Lace Embellishment", type: "embellishment", opacity: 0.4, visible: false, fabricId: "chantilly-lace" }
-  ]);
+  // Layer definitions - Persisted
+  const [layers, setLayers] = useState<DesignLayer[]>(() => {
+    const saved = localStorage.getItem("designalchemy_layers");
+    return saved ? JSON.parse(saved) : [
+      { id: "layer-1", name: "Base Silhouette", type: "silhouette", opacity: 0.85, visible: true },
+      { id: "layer-2", name: "Body Panel (Silk)", type: "base_fabric", opacity: 0.8, visible: true, fabricId: "emerald-silk" },
+      { id: "layer-3", name: "Collar Accent (Velvet)", type: "accent", opacity: 0.75, visible: true, fabricId: "ruby-velvet" },
+      { id: "layer-4", name: "Lace Embellishment", type: "embellishment", opacity: 0.4, visible: false, fabricId: "chantilly-lace" }
+    ];
+  });
   
   const [selectedLayerId, setSelectedLayerId] = useState<string>("layer-2");
 
   // Filter fabrics that are loaded into the active studio
   const activeFabrics = fabrics.filter(f => activeStudioFabricIds.includes(f.id));
 
-  // Chat/Studio Muse State
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      id: "init-msg",
-      role: "model",
-      content: "Salutations, designer. I am **Studio Muse**, your AI creative strategist. I have analyzed your active layers. Your combination of high-gloss **Emerald Silk** body panels with deep, light-absorbing **Ruby Velvet** accents creates a stunning tactile contrast. How shall we expand this silhouette?",
-      timestamp: new Date()
+  // Chat/Studio Muse State - Persisted
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
+    const saved = localStorage.getItem("designalchemy_chat_messages");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
+      } catch (e) {
+        console.error(e);
+      }
     }
-  ]);
+    return [
+      {
+        id: "init-msg",
+        role: "model",
+        content: "Salutations, designer. I am **Studio Muse**, your AI creative strategist. I have analyzed your active layers. Your combination of high-gloss **Emerald Silk** body panels with deep, light-absorbing **Ruby Velvet** accents creates a stunning tactile contrast. How shall we expand this silhouette?",
+        timestamp: new Date()
+      }
+    ];
+  });
   const [inputMessage, setInputMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
+  // Gemini Vision Attachments
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAttachedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Auto-scroll chat to bottom
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  // Sync to LocalStorage
+  useEffect(() => {
+    localStorage.setItem("designalchemy_concept_title", conceptTitle);
+  }, [conceptTitle]);
+
+  useEffect(() => {
+    localStorage.setItem("designalchemy_layers", JSON.stringify(layers));
+  }, [layers]);
+
+  useEffect(() => {
+    localStorage.setItem("designalchemy_chat_messages", JSON.stringify(chatMessages));
   }, [chatMessages]);
 
   const toggleLayerVisibility = (layerId: string) => {
@@ -66,17 +113,19 @@ export default function StudioView({
   // Call the server-side /api/chat endpoint to talk to Studio Muse
   const handleSendChatMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() && !attachedImage) return;
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
-      content: inputMessage,
-      timestamp: new Date()
+      content: inputMessage || (attachedImage ? "Uploaded an image." : ""),
+      timestamp: new Date(),
+      image: attachedImage || undefined
     };
 
     setChatMessages(prev => [...prev, userMsg]);
     setInputMessage("");
+    setAttachedImage(null);
     setIsChatLoading(true);
 
     // Build the active context to send to the server
@@ -97,7 +146,7 @@ export default function StudioView({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: chatMessages.concat(userMsg).map(m => ({ role: m.role, content: m.content })),
+          messages: chatMessages.concat(userMsg).map(m => ({ role: m.role, content: m.content, image: m.image })),
           workspaceContext
         })
       });
@@ -448,14 +497,23 @@ export default function StudioView({
                       : "bg-surface border border-on-surface/15 text-on-surface rounded-tl-none font-sans"
                   }`}
                 >
+                  {msg.image && (
+                    <img 
+                      src={msg.image} 
+                      alt="Design element" 
+                      className="max-w-full rounded-lg mb-2 border border-on-surface/10 object-contain max-h-36 block" 
+                    />
+                  )}
                   {/* Handle markdown bold formatting nicely */}
-                  <p 
-                    dangerouslySetInnerHTML={{ 
-                      __html: msg.content
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    }} 
-                  />
+                  {msg.content && (
+                    <p 
+                      dangerouslySetInnerHTML={{ 
+                        __html: msg.content
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                      }} 
+                    />
+                  )}
                 </div>
                 <span className="text-[8px] text-on-surface-variant/50 mt-1 uppercase font-bold tracking-wider px-1">
                   {msg.role === "user" ? "You" : "Muse"}
@@ -473,22 +531,52 @@ export default function StudioView({
           </div>
 
           {/* Chat Input form */}
-          <form onSubmit={handleSendChatMessage} className="flex gap-2">
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Brainstorm with Muse..."
-              className="flex-1 bg-surface border-2 border-on-surface rounded-lg px-2.5 py-2 text-xs font-semibold text-on-surface placeholder-on-surface-variant/40 focus:outline-none focus:border-secondary"
-            />
-            <button
-              type="submit"
-              disabled={isChatLoading || !inputMessage.trim()}
-              className="bg-primary hover:bg-primary-container text-on-primary border-2 border-on-surface w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer active:scale-95 disabled:opacity-50 transition-all shadow-sm"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
+          <div className="flex flex-col gap-2">
+            {attachedImage && (
+              <div className="relative w-14 h-14 border border-on-surface rounded-lg bg-surface flex items-center justify-center p-1 group self-start">
+                <img src={attachedImage} className="max-w-full max-h-full object-cover rounded" />
+                <button
+                  type="button"
+                  onClick={() => setAttachedImage(null)}
+                  className="absolute -top-1.5 -right-1.5 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shadow border border-white hover:bg-red-600 cursor-pointer"
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            )}
+            
+            <form onSubmit={handleSendChatMessage} className="flex gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-surface hover:bg-surface-container border-2 border-on-surface w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer active:scale-95 transition-all shadow-sm text-on-surface"
+                title="Attach design photo"
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder={attachedImage ? "Describe this image..." : "Brainstorm with Muse..."}
+                className="flex-1 bg-surface border-2 border-on-surface rounded-lg px-2.5 py-2 text-xs font-semibold text-on-surface placeholder-on-surface-variant/40 focus:outline-none focus:border-secondary"
+              />
+              <button
+                type="submit"
+                disabled={isChatLoading || (!inputMessage.trim() && !attachedImage)}
+                className="bg-primary hover:bg-primary-container text-on-primary border-2 border-on-surface w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer active:scale-95 disabled:opacity-50 transition-all shadow-sm"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

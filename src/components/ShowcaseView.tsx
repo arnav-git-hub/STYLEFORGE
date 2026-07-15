@@ -45,7 +45,7 @@ export default function ShowcaseView({
             Community Showcase
           </h2>
           <p className="font-headline text-on-surface-variant font-medium mt-1">
-            Explore avant-garde couture combinations curated by global StyleForge creators.
+            Explore avant-garde couture combinations curated by global DesignAlchemy creators.
           </p>
         </div>
       </div>
